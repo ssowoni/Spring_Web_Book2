@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+      PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+   
+
+<mapper namespace="com.zerock.mapper.BoardMapper">
+
+	<select id="getList" resultType="com.zerock.domain.BoardVO">
+	<![CDATA[
+		select * from tbl_board where bno>0
+	]]>
+	</select>
+	
+	
+	<!-- <sql> 태그는 sql의 일부를 별도로 보관하고, 필요한 경우 include 시키는 형태로 사용할 수 있다.  -->
+	<sql id="criteria">
+	
+		<!-- item : 전달받은 인자 값을 alias 명으로 대체
+			collection : 전달받은 인자. List or Array 형태만 가능
+			index : 반복되는 구문 번호 0부터 순차적으로 증가  -->		
+		<trim prefix="(" suffix=") AND" prefixOverrides ="OR" >
+			<!-- mybatis는 원하는 속성 찾을 때 getTypeArr()과 같이 이름에 기반을 두어 검색함. -->
+			<foreach item='type' collection="typeArr" >
+				<trim prefix="OR">
+					<choose>
+						<when test="type == 'T'.toString()">
+							title like '%' || #{keyword} || '%'
+						</when>
+						<when test="type == 'C'.toString()">
+							content like '%' || #{keyword} || '%'
+						</when>
+						<when test="type == 'W'.toString()">
+							writer like '%' || #{keyword} || '%'
+						</when>
+					</choose>
+				</trim>
+			</foreach>
+		</trim>
+	
+	</sql>
+	
+	
+	
+	
+	<select id="getListWithPaging" resultType="com.zerock.domain.BoardVO">
+	<![CDATA[
+		select bno, title, content, writer, regdate, updatedate
+		from
+			(
+				select /*+ INDEX_DESC(tbl_board pk_board ) */ 
+				rownum rn, bno, title,content ,writer, regdate, updatedate 
+				from tbl_board where 
+	]]>	
+	
+	<include refid="criteria"></include>
+	
+				
+				
+	<![CDATA[			
+				rownum<= #{pageNum} * #{amount}
+
+			)where rn >(#{pageNum} -1 ) * #{amount}
+	]]>
+	</select>
+	
+	
+	
+	<select id="getTotalCount" resultType="int">
+		select count(*) from tbl_board where 
+		<include refid="criteria"></include>
+		bno > 0
+	</select>
+	
+	
+	
+
+	<!-- 단순히 시퀀스 다음값을 구해 insert, 추가된 데이터의 pk값은 알 수 없지만
+		한 번의 sql 처리만으로 작업 완료   -->
+	<insert id="insert">
+		insert into tbl_board (bno, title, content, writer)
+		values (seq_board.nextval, #{title}, #{content}, #{writer})
+	</insert>
+	
+	<!-- @SelectKey는 주로 pk 값을 미리 sql을 통해 처리해두고 특정한 이름으로 결과를 보관하는 방식 -->
+	<insert id="insertSelectKey">
+		<selectKey keyProperty="bno" order="BEFORE" resultType="long">
+			select seq_board.nextval from dual
+		</selectKey>
+		insert into tbl_board (bno, title, content, writer)
+		values (#{bno}, #{title}, #{content}, #{writer})
+	</insert>
+
+
+	<select id="read" resultType="com.zerock.domain.BoardVO">
+		select * from tbl_board
+		where bno = #{bno}
+	</select>
+	
+	<delete id="delete">
+		delete from tbl_board
+		where bno = #{bno} 
+	</delete>
+	
+	
+	<update id="update">
+		update tbl_board
+		set 
+		title=#{title},
+		content=#{content},
+		writer=#{writer},
+		updateDate = sysdate
+		where bno = #{bno}
+	</update>
+	
+	
+	
+	
+	
+
+
+
+</mapper>
