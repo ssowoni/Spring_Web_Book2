@@ -82,7 +82,7 @@ public class ReplyController {
 	}
 	
 	@DeleteMapping(value="/{rno}"
-			,produces = MediaType.APPLICATION_JSON_VALUE)
+			,produces = MediaType.TEXT_PLAIN_VALUE)
 	public ResponseEntity<String> remove(@PathVariable("rno") Long rno){
 		
 		log.info("======== Replycontroller remove . rno: " + rno);
