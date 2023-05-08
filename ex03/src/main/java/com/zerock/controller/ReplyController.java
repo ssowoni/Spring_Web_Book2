@@ -1,7 +1,5 @@
 package com.zerock.controller;
 
-import java.util.List;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.zerock.domain.Criteria;
+import com.zerock.domain.ReplyPageDTO;
 import com.zerock.domain.ReplyVO;
 import com.zerock.service.ReplyService;
 
@@ -66,13 +65,20 @@ public class ReplyController {
 	@GetMapping(value="/pages/{bno}/{page}"
 				,produces = MediaType.APPLICATION_JSON_VALUE
 				 )
-	public ResponseEntity<List<ReplyVO>> getList(@PathVariable("bno") Long bno, @PathVariable("page") int page){
+	public ResponseEntity<ReplyPageDTO> getList(@PathVariable("bno") Long bno, @PathVariable("page") int page){
 		
 		Criteria cri = new Criteria(page,10);
-		List<ReplyVO> list = service.getList(cri, bno);
-		log.info("========== Replycontroller getList " + list);
+		//List<ReplyVO> list = service.getList(cri, bno);
+		ReplyPageDTO list = service.getListPage(cri, bno);
+		log.info("========== Replycontroller getListPage " + list);
 		return new ResponseEntity<>(list, HttpStatus.OK);
 	}
+	
+	
+	
+	
+	
+	
 	
 	@GetMapping(value="/{rno}"
 				,produces = MediaType.APPLICATION_JSON_VALUE)

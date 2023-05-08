@@ -29,23 +29,26 @@
 		
 	}
 	
-	
-	function getList(param, callback, error){
-		var bno = param.bno;
-		var page = param.page ||1; //page의 값이 없으면 1을 기본값으로 하여라
 		
-		$.getJSON("/replies/pages/"+bno+"/"+page,
-			function(data){
-				if(callback){
-					callback(data);
-				}
-			}).fail(function(xhr,statuc,err){
-				if(error){
-					error();
-				}
-			});
-	}
+	//댓글 페이징과 숫자 목록을 가져오게 변경
+	function getList(param, callback, error) {
 	
+	    var bno = param.bno;
+	    var page = param.page || 1;
+	    //$.getJSON: 전달받은 주소로 GET 방식의 HTTP 요청을 전송하여, 응답으로 JSON 파일을 전송받음.
+	    //url은 '/replies/pages/게시물번호/페이지번호' 형태이다.
+	    $.getJSON("/replies/pages/" + bno + "/" + page,
+	        function(data) {
+	            if (callback) {
+	                //callback(data); //댓글 목록만 가져오는 경우
+	                callback(data.replyCnt,data.list);//댓글 숫자와 목록을 가져오는 경우
+	            }
+	        }).fail(function(xhr, status, err) {
+	        if (error) {
+	            error();
+	        }
+	    });
+	}
 	
 	function remove(rno, callback,error){
 		//console.log("rno : " + rno);
