@@ -2,26 +2,35 @@ package com.zerock.service;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.zerock.domain.Criteria;
 import com.zerock.domain.ReplyPageDTO;
 import com.zerock.domain.ReplyVO;
+import com.zerock.mapper.BoardMapper;
 import com.zerock.mapper.ReplyMapper;
 
-import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
 @Service
 @Log4j2
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 public class ReplyServiceImpl implements ReplyService{
 	
-	private final ReplyMapper mapper;
-
+	@Setter(onMethod_ = @Autowired)
+	private ReplyMapper mapper;
+	
+	@Setter(onMethod_ = @Autowired)
+	private BoardMapper boardMapper;
+	
+	@Transactional
 	@Override
 	public int register(ReplyVO vo) {
 		log.info("==========service register" + vo );
+		boardMapper.updateReplyCnt(vo.getBno(), 1);
 		return mapper.insert(vo);
 	}
 
@@ -31,9 +40,12 @@ public class ReplyServiceImpl implements ReplyService{
 		return mapper.read(rno);
 	}
 
+	@Transactional
 	@Override
 	public int remove(Long rno) {
 		log.info("==========service remove" + rno );
+		ReplyVO vo = mapper.read(rno);
+		boardMapper.updateReplyCnt(vo.getBno(), -1);
 		return mapper.delete(rno);
 	}
 
