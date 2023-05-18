@@ -83,7 +83,20 @@ public class BoardServiceImpl implements BoardService {
 	@Override
 	public boolean modify(BoardVO board) {
 		log.info("modify....." + board);
-		return mapper.update(board) == 1;
+		
+		// 게시물의 모든 첨부파일을 삭제하고 다시 첨부파일 목록을 추가하는 형태로 처리 
+		// why? 넘어온 데이터 중 어떤 게 수정된 파일이고 어떤 파일이 삭제되었는지 알아야하기에  
+		attachMapper.deleteAll(board.getBno());
+		boolean modifyResult = mapper.update(board) == 1;
+		if(modifyResult && board.getAttachList() != null && board.getAttachList().size()>0) {
+			board.getAttachList().forEach(attach -> {
+				attach.setBno(board.getBno());
+				attachMapper.insert(attach);
+			});
+		}
+		
+		
+		return modifyResult;
 	}
 
 

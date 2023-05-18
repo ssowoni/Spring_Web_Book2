@@ -13,4 +13,7 @@ public interface BoardAttachMapper {
 	public List<BoardAttachVO> findByBno(Long bno);
 
 	public void deleteAll(Long bno);
+	
+	//오래된 파일을 가져오는 메서드
+	public List<BoardAttachVO> getOldFiles();
 }
