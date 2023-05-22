@@ -5,6 +5,16 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
+
+
+	<bean id="customLoginSuccess" class="com.zerock.security.CustomLoginSuccessHandler"></bean>
+	<!-- <bean id="customPasswordEncoder" class="com.zerock.security.CustomNoOpPasswordEncoder" ></bean> -->
+	<bean id="bcryptPasswordEncoder"
+		class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
+	
+	<bean id="customUserDetailsService"
+		class="com.zerock.security.CustomUserDetailsService"></bean>
+	
 	<!-- pattern 속성은 URI의 패턴을 의미, access의 경우 권한을 체크한다.
 			/sample/member는 'ROLE_MEMBER'라는 권한이 있는 사용자만 접근할 수 있다.   -->	
 	<security:http auto-config="true" use-expressions="true">
@@ -12,19 +22,43 @@
 		<security:intercept-url pattern="/sample/member" access="hasRole('ROLE_MEMBER')" />
 		<security:intercept-url pattern="/sample/admin" access="hasRole('ROLE_ADMIN')" />
 		
-		<security:form-login login-page="/customLogin" />
-		
+		<!-- 권한이 없는 사용자가 member, admin 페이지에 접근했을 때 자동으로 /customLogin 호출 -->
+		<security:form-login login-page="/customLogin"
+			authentication-success-handler-ref="customLoginSuccess" />
+		<security:logout logout-url="/customLogout"
+			invalidate-session="true" />
+
+		<!-- <security:csrf disabled="true"/> -->
 		<!-- AcessDeniedHandler 인터페이스의 구현체를 지정하거나 error-page를 지정할 수 있다.  -->
 		<security:access-denied-handler error-page="/accessError"/>
 	</security:http>
 
 	<security:authentication-manager>
-		<security:authentication-provider>
-			<security:user-service>
-				<!-- adming은 ROLE_ADMIN과 ROLE_MEMBER의 권한 부여 2개를 받는다. -->
+		<security:authentication-provider user-service-ref="customUserDetailsService">
+		
+			<!-- <security:jdbc-user-service data-source-ref="dataSource" 
+				users-by-username-query="select userid, userpw,enabled from tbl_member where userid=?"
+				authorities-by-username-query="select userid, auth from tbl_member_auth where userid=?"/>
+		 -->
+		 
+		 
+			<security:password-encoder ref="bcryptPasswordEncoder" />
+			
+		
+		
+	<!-- 		<security:jdbc-user-service data-source-ref="dataSource" />
+			<security:password-encoder ref="bcryptPasswordEncoder" /> -->
+			<!-- <security:password-encoder ref="customPasswordEncoder"/>	 -->
+		
+<!-- 			<security:user-service>
+				adming은 ROLE_ADMIN과 ROLE_MEMBER의 권한 부여 2개를 받는다.
+		
 				<security:user name="member" password="{noop}member" authorities="ROLE_MEMBER"/>
 				<security:user name="admin" password="{noop}admin" authorities="ROLE_ADMIN,ROLE_MEMBER"/>
-			</security:user-service>
+			</security:user-service> -->
+			
+			
+			
 		</security:authentication-provider>
 	</security:authentication-manager>
 	
