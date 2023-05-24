@@ -27,6 +27,10 @@
 			authentication-success-handler-ref="customLoginSuccess" />
 		<security:logout logout-url="/customLogout"
 			invalidate-session="true" />
+		
+		<!-- 자동 로그인에 데이터베이스를 이용하는 설정은 별도의 설정 없이 data-source-ref만을 지정하면 된다.  -->
+		<security:remember-me data-source-ref="dataSource" token-validity-seconds="604800" />	
+		<security:logout logout-url="/cutomLogout" invalidate-session="true" delete-cookies="remember-me, JSESSION_ID"/>
 
 		<!-- <security:csrf disabled="true"/> -->
 		<!-- AcessDeniedHandler 인터페이스의 구현체를 지정하거나 error-page를 지정할 수 있다.  -->
